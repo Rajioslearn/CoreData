@@ -14,25 +14,43 @@ class NotesViewController: UIViewController, CoreDataClient {
     
     private var todo: NSManagedObject?
     
+    var isNotesinEditMode: Bool = false
+    var note: Todo?
+    
     @IBOutlet weak var noteText: UITextView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        
-        setUpEntity()
+        checkIfNotInEditingMode()
     }
     
-    func setUpEntity() {
-        guard let managedObjectContext = managedObjectContext else {
-            return
+    func checkIfNotInEditingMode() {
+        if !isNotesinEditMode {
+            guard let managedObjectContext = managedObjectContext else {
+                return
+            }
+            
+            guard let todoEntity = NSEntityDescription.entity(forEntityName: "Todo", in: managedObjectContext) else {
+                return
+            }
+            todo = NSManagedObject(entity: todoEntity, insertInto: managedObjectContext)
         }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
-        guard let todoEntity = NSEntityDescription.entity(forEntityName: "Todo", in: managedObjectContext) else {
-            return
+        loadPreviousData()
+    }
+    
+    func loadPreviousData() {
+        if isNotesinEditMode {
+            if let note = note {
+                noteText.text = note.notes
+            }
         }
-        todo = NSManagedObject(entity: todoEntity, insertInto: managedObjectContext)
     }
 
     @IBAction func cancel(_ sender: UIBarButtonItem) {
@@ -40,26 +58,22 @@ class NotesViewController: UIViewController, CoreDataClient {
     }
     
     @IBAction func save(_ sender: UIBarButtonItem) {
-        todo?.setValue(noteText.text, forKey: "notes")
+        saveNote()
+        dismiss(animated: true, completion: nil)
+    }
+    
+    func saveNote() {
+        if isNotesinEditMode {
+            note?.notes = noteText.text
+        } else {
+            todo?.setValue(noteText.text, forKey: "notes")
+        }
         
         do {
             try managedObjectContext?.save()
         } catch {
             print("Could not save error")
         }
-        
-        dismiss(animated: true, completion: nil)
     }
-    
-    
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }

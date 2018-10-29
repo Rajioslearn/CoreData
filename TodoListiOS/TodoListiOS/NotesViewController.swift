@@ -14,6 +14,7 @@ class NotesViewController: UIViewController, CoreDataClient {
     
     private var todo: NSManagedObject?
     
+    @IBOutlet weak var saveButton: UIBarButtonItem!
     var isNotesinEditMode: Bool = false
     var note: Todo?
     
@@ -23,20 +24,7 @@ class NotesViewController: UIViewController, CoreDataClient {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        checkIfNotInEditingMode()
-    }
-    
-    func checkIfNotInEditingMode() {
-        if !isNotesinEditMode {
-            guard let managedObjectContext = managedObjectContext else {
-                return
-            }
-            
-            guard let todoEntity = NSEntityDescription.entity(forEntityName: "Todo", in: managedObjectContext) else {
-                return
-            }
-            todo = NSManagedObject(entity: todoEntity, insertInto: managedObjectContext)
-        }
+        noteText.delegate = self
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -54,12 +42,27 @@ class NotesViewController: UIViewController, CoreDataClient {
     }
 
     @IBAction func cancel(_ sender: UIBarButtonItem) {
+        todo = nil
         dismiss(animated: true, completion: nil)
     }
     
     @IBAction func save(_ sender: UIBarButtonItem) {
+        checkIfNotInEditingMode()
         saveNote()
         dismiss(animated: true, completion: nil)
+    }
+    
+    func checkIfNotInEditingMode() {
+        if !isNotesinEditMode {
+            guard let managedObjectContext = managedObjectContext else {
+                return
+            }
+            
+            guard let todoEntity = NSEntityDescription.entity(forEntityName: "Todo", in: managedObjectContext) else {
+                return
+            }
+            todo = NSManagedObject(entity: todoEntity, insertInto: managedObjectContext)
+        }
     }
     
     func saveNote() {
@@ -76,4 +79,15 @@ class NotesViewController: UIViewController, CoreDataClient {
         }
     }
 
+}
+
+
+extension NotesViewController: UITextViewDelegate {
+    public func textViewDidChange(_ textView: UITextView) {
+        if textView.text.count > 0 {
+            saveButton.isEnabled = true
+        } else {
+            saveButton.isEnabled = false
+        }
+    }
 }

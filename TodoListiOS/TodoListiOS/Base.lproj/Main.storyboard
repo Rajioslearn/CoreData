@@ -76,7 +76,7 @@
                                 <action selector="cancel:" destination="qGa-T1-HIV" id="JzZ-3e-1OI"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" systemItem="save" id="9eo-Vj-dzW">
+                        <barButtonItem key="rightBarButtonItem" enabled="NO" systemItem="save" id="9eo-Vj-dzW">
                             <connections>
                                 <action selector="save:" destination="qGa-T1-HIV" id="OV2-FQ-8RD"/>
                             </connections>
@@ -84,6 +84,7 @@
                     </navigationItem>
                     <connections>
                         <outlet property="noteText" destination="zNv-m1-9iE" id="jtz-15-BDo"/>
+                        <outlet property="saveButton" destination="9eo-Vj-dzW" id="eCi-by-6w5"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6At-RP-UjG" userLabel="First Responder" sceneMemberID="firstResponder"/>

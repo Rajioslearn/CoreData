@@ -49,6 +49,16 @@ class ViewController: UIViewController {
         newPerson.setValue(NSSet(object: newAddress), forKey: "addresses")
         
         
+        // adding other address
+        let otherAddress = NSManagedObject(entity: entityAddress, insertInto: managedObjectContext)
+        // Set First and Last Name
+        otherAddress.setValue("5th Avenue", forKey:"street")
+        otherAddress.setValue("New York", forKey:"city")
+        
+        // Add Address to Person
+        let addresses = newPerson.mutableSetValue(forKey: "addresses")
+        
+        addresses.add(otherAddress)
         
         // showing one to one relations ships
         
@@ -80,15 +90,18 @@ class ViewController: UIViewController {
             print("Error in saving address in person model")
         }
         
-        /* uncomment to show many to many relationships
-        print(newPerson.value(forKey:"addresses")!)
+        /* uncomment to show one to one relationships
+        print(newPerson.value(forKey: "spouse")!) */
         
+        /* uncomment to show one to many relationships
+         print(newChildPerson.value(forKey: "father")!) */
+        
+        // uncomment to show many to many relationships
+        print(newPerson.value(forKey:"addresses")!)
+        /*
         let addresses = newPerson.value(forKey:"addresses") as? Address
         // getting the person object from address
         print(addresses!.value(forKey: "persons")!) */
-
-       /* uncomment to show many to many relationships
-        print(newChildPerson.value(forKey: "father")!) */
         
         
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Person")

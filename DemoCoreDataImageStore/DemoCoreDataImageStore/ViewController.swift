@@ -15,19 +15,10 @@ class ViewController: UIViewController {
     
     var imagePickerController = UIImagePickerController()
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        
-        imagePickerController.modalPresentationStyle = .currentContext
-        imagePickerController.delegate = self
-        
-        fetchImage()
-    }
     
-    func fetchImage() {
+    var imageExists: Photo? {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
-            return
+            return nil
         }
         
         let managedObjectContext = appDelegate.persistentContainer.viewContext
@@ -36,18 +27,61 @@ class ViewController: UIViewController {
         
         do {
             guard let fetchedImage = try managedObjectContext.fetch(fetchImage) as? [Photo] else {
-                return
+                return nil
             }
             
             if let imageData = fetchedImage.first?.image {
                 
                 let image = UIImage(data: imageData)
                 imageView.image = image
+                
+                return fetchedImage.first
             }
             
         } catch {
             print("Error in fetching")
+            return nil
         }
+        return nil
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+        
+        imagePickerController.modalPresentationStyle = .currentContext
+        imagePickerController.delegate = self
+        
+       _ = imageExists
+    }
+    
+    func fetchImage() -> Photo? {
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
+            return nil
+        }
+        
+        let managedObjectContext = appDelegate.persistentContainer.viewContext
+        
+        let fetchImage = NSFetchRequest<NSFetchRequestResult>(entityName: "Photo")
+        
+        do {
+            guard let fetchedImage = try managedObjectContext.fetch(fetchImage) as? [Photo] else {
+                return nil
+            }
+            
+            if let imageData = fetchedImage.first?.image {
+                
+                let image = UIImage(data: imageData)
+                imageView.image = image
+                
+                return fetchedImage.first
+            }
+            
+        } catch {
+            print("Error in fetching")
+            return nil
+        }
+        return nil
     }
 
     @IBAction func pickImage(_ sender: Any) {
@@ -61,6 +95,8 @@ class ViewController: UIViewController {
     }
     
     func save(image: UIImage) {
+        let data: Data?
+        var photo: Photo?
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
             return
         }
@@ -72,11 +108,20 @@ class ViewController: UIViewController {
             return
         }
         
-        let todo = NSManagedObject(entity: todoEntity, insertInto: managedObjectContext)
+        if let fetchedPhoto = imageExists {
+            photo = fetchedPhoto
+        } else {
+            photo = NSManagedObject(entity: todoEntity, insertInto: managedObjectContext) as? Photo
+            
+        }
         
-        let data = image.pngData()
+        data = image.pngData()
+        photo?.setValue(data, forKey: "image")
         
-        todo.setValue(data, forKey: "image")
+        if let imageData = photo?.image {
+            let image = UIImage(data: imageData)
+            imageView.image = image
+        }
         
         // saving the data
         
